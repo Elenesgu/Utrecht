@@ -384,7 +384,7 @@ namespace Utrecht {
 		}
 
 		private static int GetChannel5G (uint chCenterFrequency) {
-			uint tmp = (chCenterFrequency % 5000) / 1000;
+			uint tmp = (chCenterFrequency % 5000000) / 1000;
 			uint tmp2 = tmp / 5;
 			int result = (int) tmp2 + 1;
 			return result;

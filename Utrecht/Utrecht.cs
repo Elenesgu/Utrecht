@@ -167,24 +167,39 @@ namespace Utrecht {
 							int BSSIDSignalQuality = (int) BSSID.linkQuality;
 							int RSSI = BSSID.rssi;
 							int Channel = GetChannel(BSSID.chCenterFrequency);
+
+							var RateSet = BSSID.wlanRateSet;
+							var RateList = new SortedSet<double>();
+							for (int rsindex = 0; rsindex < RateSet.Rates.Length; rsindex++) {
+								RateList.Add(RateSet.GetRateInMbps(rsindex));
+							}
+
 							WlanInterface.ConnectSynchronously(NativeWifi.Wlan.WlanConnectionMode.Profile, NativeWifi.Wlan.Dot11BssType.Infrastructure, profile, 5000, MacAddress);
 							Writer.WriteLine("[{0}]", BSSIDIndex++);
 							Writer.WriteLine("  MAC 주소:\t {0}", MacAddress);
 							Writer.WriteLine("  신호세기:\t {0} (RSSI: {1} dBm)", BSSIDSignalQuality, RSSI);
 
-							if (Channel < 1 || Channel > 12) {
+							if (CheckChannel5G(Channel)) {
 								Channel = GetChannel5G(BSSID.chCenterFrequency);
 								Writer.WriteLine("  채널:\t {0}Ch(5Ghz)", Channel);
 							} else {
 								Writer.WriteLine("  채널:\t {0}Ch", Channel);
 							}
 
+
+							Writer.Write("  지원 속도:\t");
+							foreach (var rate in RateList) {
+								Writer.Write("{0}Mbps", rate);
+								if (RateList.Max != rate) {
+									Writer.Write(", ");
+								}
+							}
+							Writer.WriteLine("");
 							if (InputString == "1" || InputString == "2") {
 								double speed = MeasureNetworkSpeed(Network);
-								if(speed > 1024) {
-									Writer.WriteLine("  대역폭:\t {0}MB/s", (speed/1024).ToString("F3"));
-								}
-								else {
+								if (speed > 1024) {
+									Writer.WriteLine("  대역폭:\t {0}MB/s", (speed / 1024).ToString("F3"));
+								} else {
 									Writer.WriteLine("  대역폭:\t {0}KB/s", speed.ToString("F3"));
 								}
 							}
@@ -204,6 +219,10 @@ namespace Utrecht {
 						break;
 				}
 			}
+		}
+
+		private static bool CheckChannel5G (int Channel) {
+			return Channel < 1 || Channel > 13;
 		}
 
 		static string ServerHostname = "elenesgu.asuscomm.com";
@@ -344,19 +363,31 @@ namespace Utrecht {
 				string MacAddress = BitConverter.ToString(BSSID.dot11Bssid).Replace("-", ":");
 				int BSSIDSignalQuality = (int) BSSID.linkQuality;
 				int RSSI = BSSID.rssi;
-				var RateSet = BSSID.wlanRateSet;
 				int Channel = GetChannel(BSSID.chCenterFrequency);
-				
+				var RateSet = BSSID.wlanRateSet;
+				var RateList = new SortedSet<double>();
+				for(int rsindex= 0; rsindex < RateSet.Rates.Length; rsindex++) {
+					RateList.Add(RateSet.GetRateInMbps(rsindex));
+				}
+
 
 				Writer.WriteLine("      [{0}]", BSSIDIndex++);
 				Writer.WriteLine("        MAC 주소:\t {0}", MacAddress);
 				Writer.WriteLine("        신호세기:\t {0} (RSSI: {1} dBm)", BSSIDSignalQuality, RSSI);
-				if (Channel < 1 || Channel > 12) {
+				if (CheckChannel5G(Channel)) {
 					Channel = GetChannel5G(BSSID.chCenterFrequency);
 					Writer.WriteLine("        채널:\t {0}Ch(5Ghz)", Channel);
 				} else {
 					Writer.WriteLine("        채널:\t {0}Ch", Channel);
 				}
+				Writer.Write("        지원 속도:\t");
+				foreach(var rate in RateList) {
+					Writer.Write("{0}Mbps", rate);
+					if(RateList.Max != rate) {
+						Writer.Write(", ");
+					}
+				}
+				Writer.WriteLine("");
 			}
 
 			Writer.WriteLine("  신호세기:\t {0}", SignalQuality);

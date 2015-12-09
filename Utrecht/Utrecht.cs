@@ -380,14 +380,14 @@ namespace Utrecht {
 			uint tmp = (chCenterFrequency % 2412000) / 1000;
 			uint tmp2 = tmp / 5;
 			int result = (int) tmp + 1;
-			return (int) tmp + 1;
+			return result;
 		}
 
 		private static int GetChannel5G (uint chCenterFrequency) {
 			uint tmp = (chCenterFrequency % 5000) / 1000;
 			uint tmp2 = tmp / 5;
 			int result = (int) tmp + 1;
-			return (int) tmp + 1;
+			return result;
 		}
 
 		static Utrecht() {
